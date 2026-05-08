@@ -3,3 +3,4 @@ google-generativeai
 rdkit
 py3Dmol
 stmol
+ipython_genutils
