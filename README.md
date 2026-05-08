@@ -1,6 +1,6 @@
 # 🧬 AI-Powered De Novo Drug Designer (Gemini + RDKit)
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](TU_URL_DE_STREAMLIT_AQUI)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://marwan-drug-discovery.streamlit.app/)
 
 This application represents a cutting-edge **De Novo Drug Discovery pipeline**. It combines the generative power of Large Language Models (LLMs) with the scientific rigor of Cheminformatics.
 
