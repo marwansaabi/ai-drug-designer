@@ -1,0 +1,18 @@
+name: Wake up Streamlit Apps
+
+on:
+  schedule:
+    # Se ejecuta automáticamente cada 6 horas
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Streamlit Apps
+        run: |
+          curl -I https://marwan-drug-discovery.streamlit.app/
+          curl -I https://3d-molecule-viewer.streamlit.app/
+          curl -I https://bioactivity-dashboard-ljbkeqd4haw9yruvwbhj5d.streamlit.app/
+          curl -I https://marwan-rnaseq-dashboard.streamlit.app/
