@@ -18,7 +18,7 @@ Unlike simple generative apps, this tool implements a **validation-first approac
 
 ## 🛠️ Installation & Setup
 ```bash
-git clone [https://github.com/marwansaabi/ai-drug-designer.git](https://github.com/marwansaabi/ai-drug-designer.git)
+git clone https://github.com/marwansaabi/ai-drug-designer.git
 cd ai-drug-designer
 pip install -r requirements.txt
 streamlit run app.py
