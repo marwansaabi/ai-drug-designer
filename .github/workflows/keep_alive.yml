@@ -12,5 +12,5 @@ jobs:
     steps:
       - name: Ping Streamlit Apps
         run: |
-          curl -I https://marwan-drug-discovery.streamlit.app/
-          curl -I https://marwan-rnaseq-dashboard.streamlit.app/
+          curl -sL -o /dev/null -w "%{url_effective} -> %{http_code}\n" https://marwan-drug-discovery.streamlit.app/
+          curl -sL -o /dev/null -w "%{url_effective} -> %{http_code}\n" https://marwan-rnaseq-dashboard.streamlit.app/
