@@ -13,6 +13,4 @@ jobs:
       - name: Ping Streamlit Apps
         run: |
           curl -I https://marwan-drug-discovery.streamlit.app/
-          curl -I https://3d-molecule-viewer.streamlit.app/
-          curl -I https://bioactivity-dashboard-ljbkeqd4haw9yruvwbhj5d.streamlit.app/
           curl -I https://marwan-rnaseq-dashboard.streamlit.app/
