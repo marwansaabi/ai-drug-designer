@@ -7,24 +7,46 @@ on:
   workflow_dispatch:
 
 jobs:
-  ping:
+  wake:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Streamlit Apps
-        # Streamlit Cloud bounces anonymous requests through share.streamlit.io
-        # to set a viewer session cookie before serving the app. curl needs a
-        # cookie jar (-c/-b) to carry that cookie across the redirect, or it
-        # loops between the app and the auth endpoint and never actually hits
-        # the running app (which is why the plain `curl -I` version never worked).
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Playwright
         run: |
-          for url in \
-            https://marwan-drug-discovery.streamlit.app/ \
-            https://marwan-rnaseq-dashboard.streamlit.app/ ; do
-            rm -f cookies.txt
-            code=$(curl -sL --max-redirs 15 -c cookies.txt -b cookies.txt \
-              -o /dev/null -w "%{http_code}" --max-time 30 "$url")
-            echo "$url -> $code"
-            if [ "$code" != "200" ]; then
-              echo "::warning::$url returned $code instead of 200"
-            fi
-          done
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Visit apps and wake them if asleep
+        # A plain curl/wget can't do this: Streamlit Cloud's wake-up endpoint
+        # is CSRF-protected and only responds to a real click inside the
+        # loaded page. So instead of calling their API directly, this drives
+        # an actual headless browser to do exactly what a visitor would do:
+        # open the app, and click "Yes, get this app back up!" if it's there.
+        run: |
+          python <<'EOF'
+          from playwright.sync_api import sync_playwright
+
+          URLS = [
+              "https://marwan-drug-discovery.streamlit.app/",
+              "https://marwan-rnaseq-dashboard.streamlit.app/",
+          ]
+
+          with sync_playwright() as p:
+              browser = p.chromium.launch()
+              for url in URLS:
+                  page = browser.new_page()
+                  page.goto(url, timeout=60000)
+                  try:
+                      btn = page.get_by_text("Yes, get this app back up!", exact=False)
+                      btn.wait_for(timeout=5000)
+                      btn.click()
+                      print(f"{url}: was asleep -> clicked wake button")
+                      page.wait_for_timeout(30000)
+                  except Exception:
+                      print(f"{url}: already awake, nothing to click")
+                  page.close()
+              browser.close()
+          EOF
