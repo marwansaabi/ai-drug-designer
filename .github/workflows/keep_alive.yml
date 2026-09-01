@@ -11,6 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Streamlit Apps
+        # Streamlit Cloud bounces anonymous requests through share.streamlit.io
+        # to set a viewer session cookie before serving the app. curl needs a
+        # cookie jar (-c/-b) to carry that cookie across the redirect, or it
+        # loops between the app and the auth endpoint and never actually hits
+        # the running app (which is why the plain `curl -I` version never worked).
         run: |
-          curl -sL -o /dev/null -w "%{url_effective} -> %{http_code}\n" https://marwan-drug-discovery.streamlit.app/
-          curl -sL -o /dev/null -w "%{url_effective} -> %{http_code}\n" https://marwan-rnaseq-dashboard.streamlit.app/
+          for url in \
+            https://marwan-drug-discovery.streamlit.app/ \
+            https://marwan-rnaseq-dashboard.streamlit.app/ ; do
+            rm -f cookies.txt
+            code=$(curl -sL --max-redirs 15 -c cookies.txt -b cookies.txt \
+              -o /dev/null -w "%{http_code}" --max-time 30 "$url")
+            echo "$url -> $code"
+            if [ "$code" != "200" ]; then
+              echo "::warning::$url returned $code instead of 200"
+            fi
+          done
