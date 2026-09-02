@@ -32,6 +32,7 @@ jobs:
           URLS = [
               "https://marwan-drug-discovery.streamlit.app/",
               "https://marwan-rnaseq-dashboard.streamlit.app/",
+              "https://marwan-retail-demand-forecasting.streamlit.app/",
           ]
 
           with sync_playwright() as p:
