@@ -1,6 +1,6 @@
 # 🧬 De Novo Drug Designer (Gemini + RDKit)
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://marwan-drug-discovery.streamlit.app/)
+[![Streamlit App](https://img.shields.io/badge/🚀_Try_it_live-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://marwan-drug-discovery.streamlit.app/)
 
 A Streamlit app that uses an LLM to propose novel molecular structures and then validates
 them with cheminformatics tooling before showing anything to the user. The interesting part
