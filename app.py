@@ -6,17 +6,17 @@ import py3Dmol
 from stmol import showmol
 import re
 
-st.set_page_config(page_title="De Novo Drug Designer", page_icon="🧬", layout="wide")
+st.set_page_config(page_title="De Novo Drug Designer", page_icon=":material/science:", layout="wide")
 
-st.title("🧠 De Novo AI Drug Designer (Powered by Gemini)")
+st.title("De Novo AI Drug Designer (Powered by Gemini)")
 st.markdown("""
-Esta aplicación utiliza **Inteligencia Artificial Generativa Real** para inventar nuevas moléculas desde cero. 
-Incluye un motor de validación quimioinformática (RDKit) para filtrar "alucinaciones químicas".
+This app uses **real generative AI** to design new molecules from scratch. 
+It includes a cheminformatics validation engine (RDKit) that filters out "chemical hallucinations".
 """)
 
 # --- CONFIGURACIÓN DE LA API KEY (SISTEMA DE SECRETOS) ---
-st.sidebar.header("Configuración del Motor de IA")
-user_key = st.sidebar.text_input("Introduce tu propia API Key (opcional):", type="password")
+st.sidebar.header("AI engine settings")
+user_key = st.sidebar.text_input("Enter your own API key (optional):", type="password")
 
 # Lógica inteligente de la clave
 if user_key:
@@ -27,24 +27,24 @@ else:
     gemini_key = None
 
 if not gemini_key:
-    st.sidebar.warning("⚠️ No se ha detectado ninguna clave. Para que la app funcione, añade una clave en los Secrets de Streamlit o escríbela arriba.")
+    st.sidebar.warning("No API key detected. Add one to the Streamlit Secrets or enter it above for the app to work.", icon=":material/warning:")
 else:
-    st.sidebar.success("✅ Motor de IA listo para usar.")
+    st.sidebar.success("AI engine ready.", icon=":material/check_circle:")
 
-st.sidebar.markdown("[¿No tienes clave? Consíguelo gratis aquí](https://aistudio.google.com/app/apikey)")
+st.sidebar.markdown("[No key? Get one for free here](https://aistudio.google.com/app/apikey)")
 
 # Configuración del prompt
-st.subheader("1. Define las propiedades de tu nuevo fármaco")
+st.subheader("1. Define the properties of your new drug")
 user_prompt = st.text_area(
-    "Instrucciones para la IA:", 
+    "Instructions for the AI:", 
     "You are an expert computational chemist. Generate 5 novel valid SMILES strings for molecules that could act as drugs. They must contain aromatic rings and halogens. Output ONLY the SMILES strings separated by commas. Do not explain anything, do not use markdown, just the SMILES."
 )
 
-if st.button("🚀 Generar Nuevas Moléculas (De Novo)"):
+if st.button("Generate new molecules (de novo)", type="primary"):
     if not gemini_key:
-        st.error("⚠️ Error: No hay una API Key disponible. Por favor, introdúcela en la barra lateral.")
+        st.error("No API key available. Please enter one in the sidebar.", icon=":material/error:")
     else:
-        with st.spinner("El cerebro de IA está 'soñando' nuevas estructuras químicas..."):
+        with st.spinner("The AI is dreaming up new chemical structures..."):
             try:
                 # 1. Configurar la IA de Google
                 genai.configure(api_key=gemini_key)
@@ -53,11 +53,11 @@ if st.button("🚀 Generar Nuevas Moléculas (De Novo)"):
                 available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
                 
                 if not available_models:
-                    st.error("La API Key no tiene acceso a ningún modelo generativo.")
+                    st.error("This API key has no access to any generative model.")
                     st.stop()
                 
                 chosen_model = available_models[0]
-                st.toast(f"🤖 Conectado a: {chosen_model}") 
+                st.toast(f"Connected to {chosen_model}", icon=":material/smart_toy:") 
                 
                 model = genai.GenerativeModel(chosen_model)
                 
@@ -65,10 +65,10 @@ if st.button("🚀 Generar Nuevas Moléculas (De Novo)"):
                 response = model.generate_content(user_prompt)
                 ai_response = response.text
                 
-                st.subheader("2. Resultados Crudos de la IA (Raw Output)")
+                st.subheader("2. Raw AI output")
                 st.code(ai_response)
                 
-                st.subheader("3. Motor de Validación RDKit")
+                st.subheader("3. RDKit validation engine")
                 clean_response = ai_response.replace('`', '').replace('"', '').replace("'", "")
                 potential_smiles = re.split(r'[,\n\s]+', clean_response)
                 
@@ -81,21 +81,21 @@ if st.button("🚀 Generar Nuevas Moléculas (De Novo)"):
                     mol = Chem.MolFromSmiles(s)
                     if mol is not None:
                         valid_molecules.append((s, mol))
-                        st.success(f"✅ VÁLIDA: {s}")
+                        st.success(f"VALID: {s}", icon=":material/check_circle:")
                     else:
                         if any(char in s for char in ["C", "c", "O", "N", "=", "#", "("]):
-                            st.error(f"❌ ALUCINACIÓN (Estructura imposible): {s}")
+                            st.error(f"HALLUCINATION (impossible structure): {s}", icon=":material/cancel:")
                 
                 # Renderizar las válidas
                 if valid_molecules:
-                    st.subheader("4. Análisis de las Moléculas Sobrevivientes")
+                    st.subheader("4. Analysis of the surviving molecules")
                     for smiles, mol in valid_molecules:
-                        with st.expander(f"Estructura: {smiles}"):
+                        with st.expander(f"Structure: {smiles}"):
                             col1, col2 = st.columns(2)
                             
                             with col1:
-                                st.image(Draw.MolToImage(mol), caption="Estructura 2D")
-                                st.metric("Peso Molecular", f"{Descriptors.MolWt(mol):.2f} Da")
+                                st.image(Draw.MolToImage(mol), caption="2D structure")
+                                st.metric("Molecular weight", f"{Descriptors.MolWt(mol):.2f} Da")
                                 st.metric("LogP", f"{Descriptors.MolLogP(mol):.2f}")
                             
                             with col2:
@@ -118,13 +118,13 @@ if st.button("🚀 Generar Nuevas Moléculas (De Novo)"):
                                         view.zoomTo()
                                         showmol(view, height=300, width=400)
                                     else:
-                                        st.warning("⚠️ Geometría demasiado compleja para 3D.")
+                                        st.warning("Geometry too complex for 3D.", icon=":material/warning:")
                                 except Exception as e:
-                                    st.warning(f"Error técnico en el motor 3D: {e}")
+                                    st.warning(f"Technical error in the 3D engine: {e}")
                 else:
-                    st.warning("La IA no generó ninguna molécula viable.")
+                    st.warning("The AI did not generate any viable molecules.")
 
             except Exception as e:
-                st.error(f"⚠️ Error de conexión: {e}")
+                st.error(f"Connection error: {e}", icon=":material/error:")
 
-st.sidebar.info("Proyecto de Marwan Saabi: Bioinformática + IA.")
+st.sidebar.info("A project by Marwan El Saabi: bioinformatics and AI.")
